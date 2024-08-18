@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Data
@@ -18,8 +19,7 @@ import java.time.LocalDateTime;
 public class Session {
 
     @Id
-    @Column(length = 64)
-    private String id;
+    private UUID id;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
