@@ -1,6 +1,7 @@
 package servlet;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,5 +26,19 @@ public abstract class BaseServlet extends HttpServlet {
         context = ContextUtil.buildWebContext(req, resp, getServletContext());
 
         super.service(req, resp);
+    }
+
+    protected void setCookie(HttpServletResponse resp, String name, String value, int maxAge) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setPath(getServletContext().getContextPath());
+        resp.addCookie(cookie);
+    }
+
+
+    protected void removeCookie(HttpServletResponse resp, String name) {
+        Cookie cookie = new Cookie(name, null);
+        cookie.setMaxAge(0);
+        cookie.setPath(getServletContext().getContextPath());
+        resp.addCookie(cookie);
     }
 }
