@@ -47,11 +47,13 @@ public class LoginServlet extends BaseServlet{
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             if (BCrypt.checkpw(password, user.getPassword())) {
-                HttpSession session = req.getSession();
+                HttpSession session = req.getSession(true);
                 session.setAttribute("user", user);
 
+                setCookie(resp, "JSESSIONID", session.getId(), -1);
 
-                resp.sendRedirect(req.getContextPath() + "/profile.html");
+
+                resp.sendRedirect(req.getContextPath() + "/profile");
             } else {
                 context.setVariable("error", "Неправильный логин или пароль");
                 templateEngine.process("login.html", context, resp.getWriter());
