@@ -40,4 +40,9 @@ public class SessionService {
     public void invalidateExpiredSessions() {
         sessionRepository.deleteExpiredSession();
     }
+
+    public Optional<Session> getValidSession(UUID sessionId) {
+        return findSessionById(sessionId)
+                .filter(session -> session.getExpiresAt().isAfter(LocalDateTime.now()));
+    }
 }
