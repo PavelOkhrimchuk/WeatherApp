@@ -6,25 +6,32 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import model.Session;
 import model.User;
 import org.mindrot.jbcrypt.BCrypt;
+import repository.SessionRepository;
 import repository.UserRepository;
+import service.SessionService;
 import util.HibernateUtil;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @WebServlet("/login")
-public class LoginServlet extends BaseServlet{
+public class LoginServlet extends BaseServlet {
     private UserRepository userRepository;
+    private SessionService sessionService;
 
     @Override
     public void init() throws ServletException {
         super.init();
         try {
             this.userRepository = new UserRepository(HibernateUtil.getSessionFactory());
+            this.sessionService = new SessionService(new SessionRepository(HibernateUtil.getSessionFactory()));
         } catch (Exception e) {
-            throw new ServletException("Failed to initialize UserRepository", e);
+            throw new ServletException("Failed to initialize LoginServlet", e);
         }
     }
 
@@ -47,12 +54,8 @@ public class LoginServlet extends BaseServlet{
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             if (BCrypt.checkpw(password, user.getPassword())) {
-                HttpSession session = req.getSession(true);
-                session.setAttribute("user", user);
-
-                setCookie(resp, "JSESSIONID", session.getId(), -1);
-
-
+                Session session = sessionService.createSession(user, 2);
+                setCookie(resp, "JSESSIONID", session.getId().toString(), 3600);
                 resp.sendRedirect(req.getContextPath() + "/profile");
             } else {
                 context.setVariable("error", "Неправильный логин или пароль");

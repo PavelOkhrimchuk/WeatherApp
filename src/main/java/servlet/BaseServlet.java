@@ -31,8 +31,10 @@ public abstract class BaseServlet extends HttpServlet {
     protected void setCookie(HttpServletResponse resp, String name, String value, int maxAge) {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath(getServletContext().getContextPath());
+        cookie.setMaxAge(maxAge);
         resp.addCookie(cookie);
     }
+
 
 
     protected void removeCookie(HttpServletResponse resp, String name) {
@@ -40,5 +42,17 @@ public abstract class BaseServlet extends HttpServlet {
         cookie.setMaxAge(0);
         cookie.setPath(getServletContext().getContextPath());
         resp.addCookie(cookie);
+    }
+
+    protected static String getCookieValue(HttpServletRequest req, String name) {
+        Cookie[] cookies = req.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (name.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
     }
 }

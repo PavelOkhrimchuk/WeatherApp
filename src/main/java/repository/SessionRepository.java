@@ -5,7 +5,10 @@ import model.User;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class SessionRepository {
 
@@ -26,6 +29,13 @@ public class SessionRepository {
         }
     }
 
+    public Optional<Session> findById(UUID id) {
+        try (org.hibernate.Session session = sessionFactory.openSession()) {
+            Session sessionEntity = session.get(Session.class, id);
+            return Optional.ofNullable(sessionEntity);
+        }
+    }
+
     public List<Session> findAll() {
         try (org.hibernate.Session session = sessionFactory.openSession()) {
             return session.createQuery("FROM Session", Session.class).list();
@@ -39,6 +49,43 @@ public class SessionRepository {
                     .setParameter("user", user)
                     .list();
         }
+    }
+
+    public void deleteById(UUID id) {
+        try (org.hibernate.Session session = sessionFactory.openSession()) {
+            Transaction transaction = session.beginTransaction();
+
+            Session sessionToDelete = session.get(Session.class, id);
+            if (sessionToDelete != null) {
+                session.remove(sessionToDelete);
+            }
+
+            transaction.commit();
+        }
+
+    }
+
+    public void delete(Session sessionEntity) {
+        try (org.hibernate.Session session = sessionFactory.openSession()) {
+            Transaction transaction = session.beginTransaction();
+
+            session.remove(sessionEntity);
+
+            transaction.commit();
+        }
+    }
+
+    public void deleteExpiredSession() {
+        try (org.hibernate.Session session = sessionFactory.openSession()) {
+            Transaction transaction = session.beginTransaction();
+
+            session.createQuery("DELETE FROM Session WHERE expiresAt < :now")
+                    .setParameter("now", LocalDateTime.now())
+                    .executeUpdate();
+
+            transaction.commit();
+        }
+
     }
 
 

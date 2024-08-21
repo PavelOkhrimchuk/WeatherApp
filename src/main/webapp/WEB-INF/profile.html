@@ -9,7 +9,7 @@
 <div class="container mt-5">
     <h2 class="mb-4">Профиль</h2>
     <p>Добро пожаловать, <span th:text="${user.login}"></span>!</p>
-    <form action="/logout" method="post">
+    <form th:action="@{/logout}" method="post">
         <button type="submit" class="btn btn-primary">Выйти</button>
     </form>
 </div>
