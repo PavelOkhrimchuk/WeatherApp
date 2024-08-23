@@ -1,5 +1,6 @@
 package servlet;
 
+import dto.WeatherResponseDto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import util.HibernateUtil;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,12 +33,8 @@ public class LocationServlet extends BaseServlet {
     @Override
     public void init() throws ServletException {
         super.init();
-        try {
-            this.locationService = new LocationService(new LocationRepository(HibernateUtil.getSessionFactory()), new WeatherService());
-            this.sessionService = new SessionService(new SessionRepository(HibernateUtil.getSessionFactory()));
-        } catch (Exception e) {
-            throw new ServletException("Failed to initialize LocationServlet", e);
-        }
+        this.locationService = new LocationService(new LocationRepository(HibernateUtil.getSessionFactory()), new WeatherService());
+        this.sessionService = new SessionService(new SessionRepository(HibernateUtil.getSessionFactory()));
     }
 
     @Override
@@ -54,24 +52,25 @@ public class LocationServlet extends BaseServlet {
 
             if (sessionOpt.isPresent()) {
                 User user = sessionOpt.get().getUser();
-                List<Location> locations = locationService.getAllLocationsForUser(user);
+                List<Location> locations = locationService.getLocationsByUser(user);
+
+                Map<Location, WeatherResponseDto> locationWeatherMap = locationService.getLocationWeatherMap(locations);
 
                 WebContext context = ContextUtil.buildWebContext(req, resp, getServletContext());
                 context.setVariable("locations", locations);
-                context.setVariable("user", user);
-
+                context.setVariable("locationWeatherMap", locationWeatherMap);
                 templateEngine.process("locations.html", context, resp.getWriter());
             } else {
                 resp.sendRedirect(req.getContextPath() + "/login");
             }
-        } catch (Exception e) {
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred while processing the request.");
+        } catch (IllegalArgumentException e) {
+            resp.sendRedirect(req.getContextPath() + "/login");
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String action = req.getParameter("action");
+        String cityName = req.getParameter("cityName");
         String sessionIdStr = getCookieValue(req, "JSESSIONID");
 
         if (sessionIdStr == null) {
@@ -85,49 +84,20 @@ public class LocationServlet extends BaseServlet {
 
             if (sessionOpt.isPresent()) {
                 User user = sessionOpt.get().getUser();
+                Optional<Location> locationOpt = locationService.addLocationByCityName(cityName, user);
 
-                if ("add".equals(action)) {
-                    String name = req.getParameter("name");
-                    String latitudeStr = req.getParameter("latitude");
-                    String longitudeStr = req.getParameter("longitude");
-
-                    if (name == null || latitudeStr == null || longitudeStr == null) {
-                        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing parameters");
-                        return;
-                    }
-
-                    try {
-                        double latitude = Double.parseDouble(latitudeStr);
-                        double longitude = Double.parseDouble(longitudeStr);
-
-                        locationService.addLocation(name, latitude, longitude, user);
-                    } catch (NumberFormatException e) {
-                        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid number format for latitude or longitude");
-                        return;
-                    }
-                } else if ("delete".equals(action)) {
-                    String locationIdStr = req.getParameter("locationId");
-
-                    if (locationIdStr == null) {
-                        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing locationId parameter");
-                        return;
-                    }
-
-                    try {
-                        Integer locationId = Integer.parseInt(locationIdStr);
-                        locationService.deleteLocationById(locationId);
-                    } catch (NumberFormatException e) {
-                        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid number format for locationId");
-                        return;
-                    }
+                if (locationOpt.isPresent()) {
+                    resp.sendRedirect(req.getContextPath() + "/locations");
+                } else {
+                    WebContext context = ContextUtil.buildWebContext(req, resp, getServletContext());
+                    context.setVariable("error", "Не удалось найти город или добавить локацию.");
+                    doGet(req, resp);
                 }
-
-                resp.sendRedirect(req.getContextPath() + "/locations");
             } else {
                 resp.sendRedirect(req.getContextPath() + "/login");
             }
-        } catch (Exception e) {
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred while processing the request.");
+        } catch (IllegalArgumentException e) {
+            resp.sendRedirect(req.getContextPath() + "/login");
         }
     }
 

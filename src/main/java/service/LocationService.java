@@ -5,7 +5,10 @@ import model.Location;
 import model.User;
 import repository.LocationRepository;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class LocationService {
@@ -19,39 +22,40 @@ public class LocationService {
         this.weatherService = weatherService;
     }
 
-
-    public Location addLocation(String name, double latitude, double longitude, User user) {
-        Optional<WeatherResponseDto> weatherOpt = weatherService.getWeatherByCoordinates(latitude, longitude);
-
-        if (weatherOpt.isPresent()) {
-
-            Location location = new Location();
-            location.setName(name);
-            location.setLatitude(latitude);
-            location.setLongitude(longitude);
-            location.setUser(user);
-
-            return locationRepository.save(location);
-        } else {
-            throw new RuntimeException("Не удалось получить данные о погоде для координат: " + latitude + ", " + longitude);
-        }
-
-
-    }
-
-    public List<Location> getAllLocationsForUser(User user) {
+    public List<Location> getLocationsByUser(User user) {
         return locationRepository.findByUser(user);
     }
 
-    public Optional<Location> getLocationById(Integer id) {
-        return locationRepository.findById(id);
+    public Map<Location, WeatherResponseDto> getLocationWeatherMap(List<Location> locations) throws IOException {
+        Map<Location, WeatherResponseDto> locationWeatherMap = new HashMap<>();
+
+        for (Location location : locations) {
+            Optional<WeatherResponseDto> weatherOpt = weatherService.getWeatherByCoordinates(location.getLatitude(), location.getLongitude());
+            weatherOpt.ifPresent(weather -> locationWeatherMap.put(location, weather));
+        }
+
+        return locationWeatherMap;
     }
 
-    public void deleteLocationById(Integer id) {
-        locationRepository.deleteById(id);
+    public Optional<Location> addLocationByCityName(String cityName, User user) throws IOException {
+        Optional<WeatherResponseDto> weatherOpt = weatherService.getWeatherByCity(cityName);
+
+        if (weatherOpt.isPresent()) {
+            WeatherResponseDto weather = weatherOpt.get();
+            Location location = new Location();
+            location.setName(cityName);
+            location.setLatitude(weather.getCoord().getLat());
+            location.setLongitude(weather.getCoord().getLon());
+            location.setUser(user);
+
+            locationRepository.save(location);
+            return Optional.of(location);
+        } else {
+            return Optional.empty();
+        }
     }
 
-    public Optional<WeatherResponseDto> getWeatherForLocation(Location location) {
-        return weatherService.getWeatherByCoordinates(location.getLatitude(), location.getLongitude());
+    public void deleteLocationFromUser(Location location) {
+        locationRepository.deleteById(location.getId());
     }
 }
