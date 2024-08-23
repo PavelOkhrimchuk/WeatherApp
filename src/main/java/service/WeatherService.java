@@ -51,6 +51,10 @@ public class WeatherService {
                 .build();
     }
 
+    public Optional<WeatherResponseDto> getWeatherForLocation(Location location) throws IOException {
+        return getWeatherByCoordinates(location.getLatitude(), location.getLongitude());
+    }
+
     private Optional<WeatherResponseDto> sendRequest(HttpRequest request) {
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());

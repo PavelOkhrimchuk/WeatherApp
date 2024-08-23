@@ -58,4 +58,13 @@ public class LocationService {
     public void deleteLocationFromUser(Location location) {
         locationRepository.deleteById(location.getId());
     }
+
+    public Optional<Location> getLocationById(int locationId) {
+        return locationRepository.findById(locationId);
+    }
+
+
+    public Optional<WeatherResponseDto> getWeatherForLocation(Location location) throws IOException {
+        return weatherService.getWeatherByCoordinates(location.getLatitude(), location.getLongitude());
+    }
 }
