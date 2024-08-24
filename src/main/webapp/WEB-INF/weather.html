@@ -7,7 +7,7 @@
 </head>
 <body>
 <div class="container mt-5">
-    <h2 class="mb-4">Погода для <span th:text="${location.name}">Имя локации</span></h2>
+    <h2 class="mb-4">Погода <span th:text="${location.name}">Имя локации</span></h2>
 
     <div class="mb-4">
         <p>Широта: <span th:text="${location.latitude}">0.0</span></p>
@@ -24,6 +24,7 @@
     </ul>
 
     <a th:href="@{/locations}" class="btn btn-secondary mt-4">Назад к локациям</a>
+    <a th:href="@{/locations/weather/details(id=${location.id})}" class="btn btn-info mt-4">Узнать погоду подробнее</a>
 </div>
 </body>
 </html>
