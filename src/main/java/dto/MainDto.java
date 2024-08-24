@@ -34,4 +34,25 @@ public class MainDto {
 
     @JsonProperty("grnd_level")
     private Integer grndLevel;
+
+    public String getTempCelsius() {
+        return String.format("%.2f", temp - 273.15);
+    }
+
+
+    public String getFeelsLikeCelsius() {
+        return String.format("%.2f", feelsLike - 273.15);
+    }
+
+
+    public String getTempMinCelsius() {
+        return String.format("%.2f", tempMin - 273.15);
+    }
+
+
+    public String getTempMaxCelsius() {
+        return String.format("%.2f", tempMax - 273.15);
+    }
+
+
 }

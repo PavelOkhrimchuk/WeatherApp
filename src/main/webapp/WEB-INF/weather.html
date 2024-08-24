@@ -16,13 +16,14 @@
 
     <h3>Информация о погоде:</h3>
     <ul class="list-group">
-        <li class="list-group-item">Температура: <span th:text="${weather.main.temp}">-</span> °C</li>
-        <li class="list-group-item">Ощущается как: <span th:text="${weather.main.feelsLike}">-</span> °C</li>
+        <!-- Используем методы для преобразования температуры в градусы Цельсия -->
+        <li class="list-group-item">Температура: <span th:text="${weather.main.tempCelsius}">-</span> °C</li>
+        <li class="list-group-item">Ощущается как: <span th:text="${weather.main.feelsLikeCelsius}">-</span> °C</li>
         <li class="list-group-item">Погодные условия: <span th:text="${weather.weather[0].description}">-</span></li>
         <li class="list-group-item">Скорость ветра: <span th:text="${weather.wind.speed}">-</span> м/с</li>
     </ul>
 
-    <a th:href="@{/locations}"  class="btn btn-secondary mt-4">Назад к локациям</a>
+    <a th:href="@{/locations}" class="btn btn-secondary mt-4">Назад к локациям</a>
 </div>
 </body>
 </html>
