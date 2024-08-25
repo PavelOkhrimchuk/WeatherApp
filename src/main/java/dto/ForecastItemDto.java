@@ -1,5 +1,6 @@
 package dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -11,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 public class ForecastItemDto {
 
     @JsonProperty("dt")
@@ -31,11 +33,14 @@ public class ForecastItemDto {
     @JsonProperty("visibility")
     private int visibility;
 
+    @JsonProperty("rain")
+    private RainDto rain;
+
     @JsonProperty("pop")
     private double pop;
 
     @JsonProperty("sys")
-    private SysDto sys;
+    private SysForecastDto sys;
 
     @JsonProperty("dt_txt")
     private String dtTxt;
