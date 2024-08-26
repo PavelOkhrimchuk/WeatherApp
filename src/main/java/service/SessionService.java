@@ -1,5 +1,6 @@
 package service;
 
+import exception.SessionNotFoundException;
 import model.Session;
 import model.User;
 import repository.SessionRepository;
@@ -34,7 +35,9 @@ public class SessionService {
     }
 
     public void invalidateSession(UUID sessionId) {
-        sessionRepository.deleteById(sessionId);
+        Session session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> new SessionNotFoundException("Session with ID " + sessionId + " not found."));
+        sessionRepository.delete(session);
     }
 
     public void invalidateExpiredSessions() {

@@ -1,6 +1,8 @@
 package servlet.authentication;
 
 
+import exception.UserAlreadyExistsException;
+import exception.WeakPasswordException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -41,25 +43,29 @@ public class RegistrationServlet extends BaseServlet {
 
         WebContext context = ContextUtil.buildWebContext(req, resp, getServletContext());
 
-        if (!password.equals(confirmPassword)) {
-            context.setVariable("error", "Пароли не совпадают");
-            templateEngine.process("register", context, resp.getWriter());
-            return;
+        try {
+            if (!password.equals(confirmPassword)) {
+                throw new WeakPasswordException("Passwords do not match.");
+            }
+
+            if (userRepository.findByLogin(login).isPresent()) {
+                throw new UserAlreadyExistsException("Login is already in use.");
+            }
+
+            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+            User user = new User();
+            user.setLogin(login);
+            user.setPassword(hashedPassword);
+
+            userRepository.save(user);
+            resp.sendRedirect(req.getContextPath() + "/login");
+        } catch (UserAlreadyExistsException | WeakPasswordException e) {
+            context.setVariable("error", e.getMessage());
+            templateEngine.process("register.html", context, resp.getWriter());
+        } catch (Exception e) {
+            context.setVariable("error", "An unexpected error occurred. Please try again later.");
+            templateEngine.process("register.html", context, resp.getWriter());
         }
-
-        if (userRepository.findByLogin(login).isPresent()) {
-            context.setVariable("error", "Логин уже используется");
-            templateEngine.process("register", context, resp.getWriter());
-            return;
-        }
-
-        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-        User user = new User();
-        user.setLogin(login);
-        user.setPassword(hashedPassword);
-
-        userRepository.save(user);
-
-        resp.sendRedirect(req.getContextPath() + "/login");
     }
+
 }

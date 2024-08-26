@@ -1,6 +1,7 @@
 package servlet.authentication;
 
 
+import exception.InvalidCredentialsException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,27 +46,33 @@ public class LoginServlet extends BaseServlet {
 
         templateEngine.process("login.html", context, resp.getWriter());
     }
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String login = req.getParameter("login");
         String password = req.getParameter("password");
 
-        Optional<User> userOpt = userRepository.findByLogin(login);
+        try {
+            Optional<User> userOpt = userRepository.findByLogin(login);
 
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            if (BCrypt.checkpw(password, user.getPassword())) {
-                Session session = sessionService.createSession(user, 2);
-                setCookie(resp, "JSESSIONID", session.getId().toString(), 3600);
-                resp.sendRedirect(req.getContextPath() + "/profile");
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                if (BCrypt.checkpw(password, user.getPassword())) {
+                    Session session = sessionService.createSession(user, 2);
+                    setCookie(resp, "JSESSIONID", session.getId().toString(), 3600);
+                    resp.sendRedirect(req.getContextPath() + "/profile");
+                } else {
+                    throw new InvalidCredentialsException("Invalid login or password.");
+                }
             } else {
-                context.setVariable("error", "Неправильный логин или пароль");
-                templateEngine.process("login.html", context, resp.getWriter());
+                throw new InvalidCredentialsException("Invalid login or password.");
             }
-        } else {
-            context.setVariable("error", "Неправильный логин или пароль");
+        } catch (InvalidCredentialsException e) {
+            context.setVariable("error", e.getMessage());
+            templateEngine.process("login.html", context, resp.getWriter());
+        } catch (Exception e) {
+            context.setVariable("error", "An unexpected error occurred. Please try again later.");
             templateEngine.process("login.html", context, resp.getWriter());
         }
     }
+
 }

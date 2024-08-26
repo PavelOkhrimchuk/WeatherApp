@@ -1,5 +1,6 @@
 package repository;
 
+import exception.UserAlreadyExistsException;
 import model.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -18,13 +19,15 @@ public class UserRepository {
 
     public User save(User user) {
         try (Session session = sessionFactory.openSession()) {
+            Optional<User> existingUser = findByLogin(user.getLogin());
+            if (existingUser.isPresent()) {
+                throw new UserAlreadyExistsException("User with login " + user.getLogin() + " already exists.");
+            }
+
             Transaction transaction = session.beginTransaction();
-
             session.persist(user);
-
             transaction.commit();
             return user;
-
         }
     }
 
