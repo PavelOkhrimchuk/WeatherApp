@@ -20,7 +20,8 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@WebServlet("/login")
+@WebServlet({"/login", "/"})
+
 public class LoginServlet extends BaseServlet {
     private UserRepository userRepository;
     private SessionService sessionService;
