@@ -1,4 +1,4 @@
-package servlet;
+package servlet.authentication;
 
 
 import jakarta.servlet.ServletException;
@@ -8,13 +8,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import repository.SessionRepository;
 import service.SessionService;
+import servlet.BaseServlet;
 import util.HibernateUtil;
 
 import java.io.IOException;
 import java.util.UUID;
 
 @WebServlet("/logout")
-public class LogoutServlet extends BaseServlet{
+public class LogoutServlet extends BaseServlet {
 
     private SessionService sessionService;
 

@@ -1,4 +1,4 @@
-package servlet;
+package servlet.authentication;
 
 
 import jakarta.servlet.ServletException;
@@ -12,6 +12,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import repository.SessionRepository;
 import repository.UserRepository;
 import service.SessionService;
+import servlet.BaseServlet;
 import util.HibernateUtil;
 
 import java.io.IOException;

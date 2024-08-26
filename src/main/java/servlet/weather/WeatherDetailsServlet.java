@@ -1,7 +1,6 @@
-package servlet;
+package servlet.weather;
 
-
-import dto.WeatherForecastResponseDto;
+import dto.WeatherResponseDto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,17 +8,21 @@ import jakarta.servlet.http.HttpServletResponse;
 import model.Location;
 import org.thymeleaf.context.WebContext;
 import repository.LocationRepository;
-
 import service.LocationService;
 import service.WeatherService;
+import servlet.BaseServlet;
 import util.ContextUtil;
 import util.HibernateUtil;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
-@WebServlet("/locations/forecast")
-public class ForecastServlet extends BaseServlet {
+@WebServlet("/locations/weather/details")
+public class WeatherDetailsServlet extends BaseServlet {
 
 
     private LocationService locationService;
@@ -45,14 +48,29 @@ public class ForecastServlet extends BaseServlet {
 
             if (locationOpt.isPresent()) {
                 Location location = locationOpt.get();
-                Optional<WeatherForecastResponseDto> forecastOpt = locationService.getForecastForLocation(location);
+                Optional<WeatherResponseDto> weatherOpt = locationService.getWeatherForLocation(location);
 
-                if (forecastOpt.isPresent()) {
-                    WeatherForecastResponseDto forecast = forecastOpt.get();
+                if (weatherOpt.isPresent()) {
+                    WeatherResponseDto weather = weatherOpt.get();
+
+
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+
+                    ZonedDateTime sunriseUtc = Instant.ofEpochSecond(weather.getSys().getSunrise()).atZone(ZoneId.of("UTC"));
+                    ZonedDateTime sunsetUtc = Instant.ofEpochSecond(weather.getSys().getSunset()).atZone(ZoneId.of("UTC"));
+
+                    String sunriseTime = sunriseUtc.withZoneSameInstant(ZoneId.of("Europe/Moscow")).format(formatter);
+                    String sunsetTime = sunsetUtc.withZoneSameInstant(ZoneId.of("Europe/Moscow")).format(formatter);
+
+
                     WebContext context = ContextUtil.buildWebContext(req, resp, getServletContext());
-                    context.setVariable("forecast", forecast);
+                    context.setVariable("weather", weather);
                     context.setVariable("location", location);
-                    templateEngine.process("forecast.html", context, resp.getWriter());
+                    context.setVariable("sunriseTime", sunriseTime);
+                    context.setVariable("sunsetTime", sunsetTime);
+
+                    templateEngine.process("weather_details.html", context, resp.getWriter());
                 } else {
                     resp.sendRedirect(req.getContextPath() + "/locations");
                 }

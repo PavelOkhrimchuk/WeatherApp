@@ -1,4 +1,4 @@
-package servlet;
+package servlet.weather;
 
 import dto.WeatherResponseDto;
 import jakarta.servlet.ServletException;
@@ -10,13 +10,14 @@ import org.thymeleaf.context.WebContext;
 import repository.LocationRepository;
 import service.LocationService;
 import service.WeatherService;
+import servlet.BaseServlet;
 import util.ContextUtil;
 import util.HibernateUtil;
 
 import java.io.IOException;
 import java.util.Optional;
 @WebServlet("/locations/weather")
-public class WeatherServlet  extends BaseServlet{
+public class WeatherServlet  extends BaseServlet {
 
         private LocationService locationService;
 

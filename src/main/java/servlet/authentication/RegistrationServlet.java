@@ -1,4 +1,4 @@
-package servlet;
+package servlet.authentication;
 
 
 import jakarta.servlet.ServletException;
@@ -10,6 +10,7 @@ import model.User;
 import org.mindrot.jbcrypt.BCrypt;
 import org.thymeleaf.context.WebContext;
 import repository.UserRepository;
+import servlet.BaseServlet;
 import util.ContextUtil;
 import util.HibernateUtil;
 
