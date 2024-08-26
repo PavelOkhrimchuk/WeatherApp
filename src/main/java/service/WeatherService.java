@@ -2,6 +2,7 @@ package service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dto.CoordinatesDto;
+import dto.WeatherForecastResponseDto;
 import dto.WeatherResponseDto;
 import model.Location;
 
@@ -16,6 +17,9 @@ public class WeatherService {
 
     private static final String API_KEY = "700daeb1e0b92b52a99f2c05f092db91";
     private static final String BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
+
+
+    private static final String FORECAST_URL = "https://api.openweathermap.org/data/2.5/forecast";
 
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
@@ -62,6 +66,52 @@ public class WeatherService {
             if (response.statusCode() == 200) {
                 WeatherResponseDto weatherResponse = objectMapper.readValue(response.body(), WeatherResponseDto.class);
                 return Optional.of(weatherResponse);
+            } else {
+                System.err.println("Error: " + response.statusCode() + " " + response.body());
+                return Optional.empty();
+            }
+        } catch (IOException | InterruptedException e) {
+            return Optional.empty();
+        }
+    }
+
+
+    public Optional<WeatherForecastResponseDto> getForecastByCity(String cityName) {
+        HttpRequest request = buildForecastRequestByCity(cityName);
+        return sendForecastRequest(request);
+    }
+
+    public Optional<WeatherForecastResponseDto> getForecastByCoordinates(double lat, double lon) {
+        HttpRequest request = buildForecastRequestByCoordinates(lat, lon);
+        return sendForecastRequest(request);
+    }
+
+    private HttpRequest buildForecastRequestByCity(String cityName) {
+        String url = String.format("%s?q=%s&appid=%s", FORECAST_URL, cityName, API_KEY);
+        return HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .GET()
+                .build();
+    }
+
+    private HttpRequest buildForecastRequestByCoordinates(double lat, double lon) {
+        String url = String.format("%s?lat=%f&lon=%f&appid=%s", FORECAST_URL, lat, lon, API_KEY);
+        return HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .GET()
+                .build();
+    }
+
+    private Optional<WeatherForecastResponseDto> sendForecastRequest(HttpRequest request) {
+        try {
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+
+            System.out.println("Response Body: " + response.body());
+
+            if (response.statusCode() == 200) {
+                WeatherForecastResponseDto forecastResponse = objectMapper.readValue(response.body(), WeatherForecastResponseDto.class);
+                return Optional.of(forecastResponse);
             } else {
                 System.err.println("Error: " + response.statusCode() + " " + response.body());
                 return Optional.empty();

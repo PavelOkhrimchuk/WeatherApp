@@ -30,6 +30,9 @@
             <!-- Ссылка для получения погоды -->
             <a th:href="@{/locations/weather(id=${location.id})}" class="btn btn-info btn-sm">Погода</a>
 
+            <!-- Ссылка для получения прогноза на 5 дней -->
+            <a th:href="@{/locations/forecast(id=${location.id})}" class="btn btn-warning btn-sm">Прогноз на 5 дней</a>
+
             <!-- Форма для удаления локации -->
             <form th:action="@{/locations/delete}" method="post" class="d-inline mt-2">
                 <input type="hidden" name="locationId" th:value="${location.id}">

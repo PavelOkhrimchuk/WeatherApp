@@ -54,11 +54,11 @@ public class LocationServlet extends BaseServlet {
                 User user = sessionOpt.get().getUser();
                 List<Location> locations = locationService.getLocationsByUser(user);
 
-                Map<Location, WeatherResponseDto> locationWeatherMap = locationService.getLocationWeatherMap(locations);
+                //Map<Location, WeatherResponseDto> locationWeatherMap = locationService.getLocationWeatherMap(locations);
 
                 WebContext context = ContextUtil.buildWebContext(req, resp, getServletContext());
                 context.setVariable("locations", locations);
-                context.setVariable("locationWeatherMap", locationWeatherMap);
+                // context.setVariable("locationWeatherMap", locationWeatherMap);
                 templateEngine.process("locations.html", context, resp.getWriter());
             } else {
                 resp.sendRedirect(req.getContextPath() + "/login");
