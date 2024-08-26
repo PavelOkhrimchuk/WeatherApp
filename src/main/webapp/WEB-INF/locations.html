@@ -22,9 +22,19 @@
     <h3>Список локаций:</h3>
     <ul class="list-group">
         <li class="list-group-item" th:each="location : ${locations}">
-            <span th:text="${location.name}">Название города</span>
-            <span th:text="'(' + ${location.latitude} + ', ' + ${location.longitude} + ')'"> (Широта, Долгота)</span>
-            <form th:action="@{/locations/delete}" method="post" class="d-inline">
+            <div>
+                <span th:text="${location.name}">Название города</span>
+                <span th:text="' (' + ${location.latitude} + ', ' + ${location.longitude} + ')'"> (Широта, Долгота)</span>
+            </div>
+
+            <!-- Ссылка для получения погоды -->
+            <a th:href="@{/locations/weather(id=${location.id})}" class="btn btn-info btn-sm">Погода</a>
+
+            <!-- Ссылка для получения прогноза на 5 дней -->
+            <a th:href="@{/locations/forecast(id=${location.id})}" class="btn btn-warning btn-sm">Прогноз на 5 дней</a>
+
+            <!-- Форма для удаления локации -->
+            <form th:action="@{/locations/delete}" method="post" class="d-inline mt-2">
                 <input type="hidden" name="locationId" th:value="${location.id}">
                 <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
             </form>

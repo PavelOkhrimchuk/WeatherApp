@@ -1,5 +1,6 @@
 package dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -9,6 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"temp_kf"})
 public class MainDto {
 
     @JsonProperty("temp")
@@ -34,4 +36,28 @@ public class MainDto {
 
     @JsonProperty("grnd_level")
     private Integer grndLevel;
+
+    @JsonProperty("temp_kf")
+    private Double tempKf;
+
+    public String getTempCelsius() {
+        return String.format("%.2f", temp - 273.15);
+    }
+
+
+    public String getFeelsLikeCelsius() {
+        return String.format("%.2f", feelsLike - 273.15);
+    }
+
+
+    public String getTempMinCelsius() {
+        return String.format("%.2f", tempMin - 273.15);
+    }
+
+
+    public String getTempMaxCelsius() {
+        return String.format("%.2f", tempMax - 273.15);
+    }
+
+
 }

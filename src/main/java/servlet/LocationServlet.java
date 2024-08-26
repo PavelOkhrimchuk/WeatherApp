@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 
-@WebServlet("/locations")
+@WebServlet(urlPatterns = {"/locations", "/locations/delete"})
 public class LocationServlet extends BaseServlet {
 
     private LocationService locationService;
@@ -54,11 +54,11 @@ public class LocationServlet extends BaseServlet {
                 User user = sessionOpt.get().getUser();
                 List<Location> locations = locationService.getLocationsByUser(user);
 
-                Map<Location, WeatherResponseDto> locationWeatherMap = locationService.getLocationWeatherMap(locations);
+                //Map<Location, WeatherResponseDto> locationWeatherMap = locationService.getLocationWeatherMap(locations);
 
                 WebContext context = ContextUtil.buildWebContext(req, resp, getServletContext());
                 context.setVariable("locations", locations);
-                context.setVariable("locationWeatherMap", locationWeatherMap);
+                // context.setVariable("locationWeatherMap", locationWeatherMap);
                 templateEngine.process("locations.html", context, resp.getWriter());
             } else {
                 resp.sendRedirect(req.getContextPath() + "/login");
@@ -84,14 +84,33 @@ public class LocationServlet extends BaseServlet {
 
             if (sessionOpt.isPresent()) {
                 User user = sessionOpt.get().getUser();
-                Optional<Location> locationOpt = locationService.addLocationByCityName(cityName, user);
 
-                if (locationOpt.isPresent()) {
+
+                String locationIdStr = req.getParameter("locationId");
+                if (locationIdStr != null) {
+                    int locationId = Integer.parseInt(locationIdStr);
+                    Optional<Location> locationOpt = locationService.getLocationById(locationId);
+
+                    if (locationOpt.isPresent()) {
+                        Location location = locationOpt.get();
+
+                        // Удаление локации, если она принадлежит текущему пользователю
+                        if (location.getUser().equals(user)) {
+                            locationService.deleteLocationFromUser(location);
+                        }
+                    }
+
                     resp.sendRedirect(req.getContextPath() + "/locations");
-                } else {
-                    WebContext context = ContextUtil.buildWebContext(req, resp, getServletContext());
-                    context.setVariable("error", "Не удалось найти город или добавить локацию.");
-                    doGet(req, resp);
+                } else if (cityName != null) {
+                    Optional<Location> locationOpt = locationService.addLocationByCityName(cityName, user);
+
+                    if (locationOpt.isPresent()) {
+                        resp.sendRedirect(req.getContextPath() + "/locations");
+                    } else {
+                        WebContext context = ContextUtil.buildWebContext(req, resp, getServletContext());
+                        context.setVariable("error", "Не удалось найти город или добавить локацию.");
+                        doGet(req, resp);
+                    }
                 }
             } else {
                 resp.sendRedirect(req.getContextPath() + "/login");
@@ -100,6 +119,8 @@ public class LocationServlet extends BaseServlet {
             resp.sendRedirect(req.getContextPath() + "/login");
         }
     }
+
+
 
 
 }
