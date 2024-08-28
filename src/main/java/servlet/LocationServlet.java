@@ -1,6 +1,8 @@
 package servlet;
 
 import dto.WeatherResponseDto;
+import exception.CityNotFoundException;
+import exception.InvalidCityNameException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,9 +56,15 @@ public class LocationServlet extends BaseServlet {
                 User user = sessionOpt.get().getUser();
                 List<Location> locations = locationService.getLocationsByUser(user);
 
-
                 WebContext context = ContextUtil.buildWebContext(req, resp, getServletContext());
                 context.setVariable("locations", locations);
+
+
+                String error = (String) req.getAttribute("error");
+                if (error != null) {
+                    context.setVariable("error", error);
+                }
+
                 templateEngine.process("locations.html", context, resp.getWriter());
             } else {
                 resp.sendRedirect(req.getContextPath() + "/login");
@@ -76,6 +84,8 @@ public class LocationServlet extends BaseServlet {
             return;
         }
 
+        WebContext context = ContextUtil.buildWebContext(req, resp, getServletContext());
+
         try {
             UUID sessionId = UUID.fromString(sessionIdStr);
             Optional<Session> sessionOpt = sessionService.getValidSession(sessionId);
@@ -83,6 +93,8 @@ public class LocationServlet extends BaseServlet {
             if (sessionOpt.isPresent()) {
                 User user = sessionOpt.get().getUser();
 
+                List<Location> locations = locationService.getLocationsByUser(user);
+                context.setVariable("locations", locations);
 
                 String locationIdStr = req.getParameter("locationId");
                 if (locationIdStr != null) {
@@ -92,7 +104,6 @@ public class LocationServlet extends BaseServlet {
                     if (locationOpt.isPresent()) {
                         Location location = locationOpt.get();
 
-                        // Удаление локации, если она принадлежит текущему пользователю
                         if (location.getUser().equals(user)) {
                             locationService.deleteLocationFromUser(location);
                         }
@@ -105,18 +116,39 @@ public class LocationServlet extends BaseServlet {
                     if (locationOpt.isPresent()) {
                         resp.sendRedirect(req.getContextPath() + "/locations");
                     } else {
-                        WebContext context = ContextUtil.buildWebContext(req, resp, getServletContext());
-                        context.setVariable("error", "Не удалось найти город или добавить локацию.");
-                        doGet(req, resp);
+                        context.setVariable("error", "Failed to find a city or add a location");
+                        templateEngine.process("locations.html", context, resp.getWriter());
                     }
                 }
             } else {
                 resp.sendRedirect(req.getContextPath() + "/login");
             }
+        } catch (InvalidCityNameException e) {
+            context.setVariable("error", e.getMessage());
+            List<Location> locations = locationService.getLocationsByUser(sessionService.getValidSession(UUID.fromString(sessionIdStr)).orElseThrow().getUser());
+            context.setVariable("locations", locations);
+            templateEngine.process("locations.html", context, resp.getWriter());
+        } catch (CityNotFoundException e) {
+            context.setVariable("error", "City not found.");
+            List<Location> locations = locationService.getLocationsByUser(sessionService.getValidSession(UUID.fromString(sessionIdStr)).orElseThrow().getUser());
+            context.setVariable("locations", locations);
+            templateEngine.process("locations.html", context, resp.getWriter());
         } catch (IllegalArgumentException e) {
-            resp.sendRedirect(req.getContextPath() + "/login");
+            context.setVariable("error", "Invalid data format.");
+            List<Location> locations = locationService.getLocationsByUser(sessionService.getValidSession(UUID.fromString(sessionIdStr)).orElseThrow().getUser());
+            context.setVariable("locations", locations);
+            templateEngine.process("locations.html", context, resp.getWriter());
+        } catch (Exception e) {
+            context.setVariable("error", "An unexpected error occurred.");
+            List<Location> locations = locationService.getLocationsByUser(sessionService.getValidSession(UUID.fromString(sessionIdStr)).orElseThrow().getUser());
+            context.setVariable("locations", locations);
+            templateEngine.process("locations.html", context, resp.getWriter());
         }
     }
+
+
+
+
 
 
 

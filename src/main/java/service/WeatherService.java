@@ -4,13 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dto.CoordinatesDto;
 import dto.WeatherForecastResponseDto;
 import dto.WeatherResponseDto;
+import exception.CityNotFoundException;
+import exception.InvalidCityNameException;
 import model.Location;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 public class WeatherService {
@@ -26,22 +30,21 @@ public class WeatherService {
     }
 
     public Optional<WeatherResponseDto> getWeatherByCity(String cityName) {
-        String endpoint = "weather";
-        HttpRequest request = buildRequest(endpoint, "q=" + cityName);
+        if (cityName == null || cityName.trim().isEmpty()) {
+            throw new InvalidCityNameException("City name cannot be empty.");
+        }
+        String encodedCityName = URLEncoder.encode(cityName.trim(), StandardCharsets.UTF_8);
+        HttpRequest request = buildRequest("weather", "q=" + encodedCityName);
         return sendRequest(request, WeatherResponseDto.class);
     }
 
     public Optional<WeatherResponseDto> getWeatherByCoordinates(double lat, double lon) {
-        String endpoint = "weather";
-        String params = String.format("lat=%f&lon=%f", lat, lon);
-        HttpRequest request = buildRequest(endpoint, params);
+        HttpRequest request = buildRequest("weather", String.format("lat=%f&lon=%f", lat, lon));
         return sendRequest(request, WeatherResponseDto.class);
     }
 
     public Optional<WeatherForecastResponseDto> getForecastByCoordinates(double lat, double lon) {
-        String endpoint = "forecast";
-        String params = String.format("lat=%f&lon=%f", lat, lon);
-        HttpRequest request = buildRequest(endpoint, params);
+        HttpRequest request = buildRequest("forecast", String.format("lat=%f&lon=%f", lat, lon));
         return sendRequest(request, WeatherForecastResponseDto.class);
     }
 
@@ -60,6 +63,8 @@ public class WeatherService {
             if (response.statusCode() == 200) {
                 T responseDto = objectMapper.readValue(response.body(), responseType);
                 return Optional.of(responseDto);
+            } else if (response.statusCode() == 404) {
+                throw new CityNotFoundException("City not found: " + request.uri().toString());
             } else {
                 System.err.println("Error: " + response.statusCode() + " " + response.body());
                 return Optional.empty();
@@ -68,6 +73,10 @@ public class WeatherService {
             return Optional.empty();
         }
     }
+
+
+
+
 
 
 
