@@ -1,7 +1,11 @@
-package dto;
+package dto.main.forecast;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dto.main.MainDto;
+import dto.main.RainDto;
+import dto.main.WeatherDto;
+import dto.main.WindDto;
+import dto.main.weather.CloudsDto;
 import lombok.*;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package dto;
+package dto.main;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,8 +9,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SysForecastDto {
+public class RainDto {
 
-    @JsonProperty("pod")
-    private String pod;
+    @JsonProperty("3h")
+    private Double threeHour;
 }

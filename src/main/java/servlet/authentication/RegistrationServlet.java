@@ -1,15 +1,16 @@
 package servlet.authentication;
 
 
+import dto.user.UserRegistrationDto;
+import exception.user.UserAlreadyExistsException;
+import exception.user.WeakPasswordException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import model.User;
-import org.mindrot.jbcrypt.BCrypt;
 import org.thymeleaf.context.WebContext;
 import repository.UserRepository;
+import service.UserService;
 import servlet.BaseServlet;
 import util.ContextUtil;
 import util.HibernateUtil;
@@ -18,12 +19,14 @@ import java.io.IOException;
 
 @WebServlet("/register")
 public class RegistrationServlet extends BaseServlet {
-    private UserRepository userRepository;
+
+    private UserService userService;
+
 
     @Override
     public void init() throws ServletException {
         super.init();
-        this.userRepository = new UserRepository(HibernateUtil.getSessionFactory());
+        this.userService = new UserService(new UserRepository(HibernateUtil.getSessionFactory()));
     }
 
     @Override
@@ -41,25 +44,22 @@ public class RegistrationServlet extends BaseServlet {
 
         WebContext context = ContextUtil.buildWebContext(req, resp, getServletContext());
 
-        if (!password.equals(confirmPassword)) {
-            context.setVariable("error", "Пароли не совпадают");
-            templateEngine.process("register", context, resp.getWriter());
-            return;
+        UserRegistrationDto registrationDto = new UserRegistrationDto();
+        registrationDto.setLogin(login);
+        registrationDto.setPassword(password);
+        registrationDto.setConfirmPassword(confirmPassword);
+
+        try {
+            userService.registerUser(registrationDto);
+            resp.sendRedirect(req.getContextPath() + "/login");
+        } catch (UserAlreadyExistsException | WeakPasswordException e) {
+            context.setVariable("error", e.getMessage());
+            templateEngine.process("register.html", context, resp.getWriter());
+        } catch (Exception e) {
+            context.setVariable("error", "An unexpected error occurred. Please try again later.");
+            templateEngine.process("register.html", context, resp.getWriter());
         }
-
-        if (userRepository.findByLogin(login).isPresent()) {
-            context.setVariable("error", "Логин уже используется");
-            templateEngine.process("register", context, resp.getWriter());
-            return;
-        }
-
-        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-        User user = new User();
-        user.setLogin(login);
-        user.setPassword(hashedPassword);
-
-        userRepository.save(user);
-
-        resp.sendRedirect(req.getContextPath() + "/login");
     }
+
 }
+

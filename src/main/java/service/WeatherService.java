@@ -1,26 +1,24 @@
 package service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dto.CoordinatesDto;
-import dto.WeatherForecastResponseDto;
-import dto.WeatherResponseDto;
-import model.Location;
+import dto.main.forecast.WeatherForecastResponseDto;
+import dto.main.weather.WeatherResponseDto;
+import exception.location.CityNotFoundException;
+import exception.location.InvalidCityNameException;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 public class WeatherService {
 
     private static final String API_KEY = "700daeb1e0b92b52a99f2c05f092db91";
-    private static final String BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
-
-
-    private static final String FORECAST_URL = "https://api.openweathermap.org/data/2.5/forecast";
-
+    private static final String BASE_URL = "https://api.openweathermap.org/data/2.5/";
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
@@ -30,88 +28,41 @@ public class WeatherService {
     }
 
     public Optional<WeatherResponseDto> getWeatherByCity(String cityName) {
-        HttpRequest request = buildRequestByCity(cityName);
-        return sendRequest(request);
+        if (cityName == null || cityName.trim().isEmpty()) {
+            throw new InvalidCityNameException("City name cannot be empty.");
+        }
+        String encodedCityName = URLEncoder.encode(cityName.trim(), StandardCharsets.UTF_8);
+        HttpRequest request = buildRequest("weather", "q=" + encodedCityName);
+        return sendRequest(request, WeatherResponseDto.class);
     }
 
     public Optional<WeatherResponseDto> getWeatherByCoordinates(double lat, double lon) {
-        HttpRequest request = buildRequestByCoordinates(lat, lon);
-        return sendRequest(request);
-    }
-
-    private HttpRequest buildRequestByCity(String cityName) {
-        String url = String.format("%s?q=%s&appid=%s", BASE_URL, cityName, API_KEY);
-        return HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .GET()
-                .build();
-    }
-
-    private HttpRequest buildRequestByCoordinates(double lat, double lon) {
-        String url = String.format("%s?lat=%f&lon=%f&appid=%s", BASE_URL, lat, lon, API_KEY);
-        return HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .GET()
-                .build();
-    }
-
-    public Optional<WeatherResponseDto> getWeatherForLocation(Location location) throws IOException {
-        return getWeatherByCoordinates(location.getLatitude(), location.getLongitude());
-    }
-
-    private Optional<WeatherResponseDto> sendRequest(HttpRequest request) {
-        try {
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() == 200) {
-                WeatherResponseDto weatherResponse = objectMapper.readValue(response.body(), WeatherResponseDto.class);
-                return Optional.of(weatherResponse);
-            } else {
-                System.err.println("Error: " + response.statusCode() + " " + response.body());
-                return Optional.empty();
-            }
-        } catch (IOException | InterruptedException e) {
-            return Optional.empty();
-        }
-    }
-
-
-    public Optional<WeatherForecastResponseDto> getForecastByCity(String cityName) {
-        HttpRequest request = buildForecastRequestByCity(cityName);
-        return sendForecastRequest(request);
+        HttpRequest request = buildRequest("weather", String.format("lat=%f&lon=%f", lat, lon));
+        return sendRequest(request, WeatherResponseDto.class);
     }
 
     public Optional<WeatherForecastResponseDto> getForecastByCoordinates(double lat, double lon) {
-        HttpRequest request = buildForecastRequestByCoordinates(lat, lon);
-        return sendForecastRequest(request);
+        HttpRequest request = buildRequest("forecast", String.format("lat=%f&lon=%f", lat, lon));
+        return sendRequest(request, WeatherForecastResponseDto.class);
     }
 
-    private HttpRequest buildForecastRequestByCity(String cityName) {
-        String url = String.format("%s?q=%s&appid=%s", FORECAST_URL, cityName, API_KEY);
+    private HttpRequest buildRequest(String endpoint, String params) {
+        String url = String.format("%s%s?%s&appid=%s", BASE_URL, endpoint, params, API_KEY);
         return HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .GET()
                 .build();
     }
 
-    private HttpRequest buildForecastRequestByCoordinates(double lat, double lon) {
-        String url = String.format("%s?lat=%f&lon=%f&appid=%s", FORECAST_URL, lat, lon, API_KEY);
-        return HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .GET()
-                .build();
-    }
-
-    private Optional<WeatherForecastResponseDto> sendForecastRequest(HttpRequest request) {
+    private <T> Optional<T> sendRequest(HttpRequest request, Class<T> responseType) {
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-
-            System.out.println("Response Body: " + response.body());
-
             if (response.statusCode() == 200) {
-                WeatherForecastResponseDto forecastResponse = objectMapper.readValue(response.body(), WeatherForecastResponseDto.class);
-                return Optional.of(forecastResponse);
+                T responseDto = objectMapper.readValue(response.body(), responseType);
+                return Optional.of(responseDto);
+            } else if (response.statusCode() == 404) {
+                throw new CityNotFoundException("City not found: " + request.uri().toString());
             } else {
                 System.err.println("Error: " + response.statusCode() + " " + response.body());
                 return Optional.empty();
@@ -120,6 +71,9 @@ public class WeatherService {
             return Optional.empty();
         }
     }
+
+
+
 
 
 

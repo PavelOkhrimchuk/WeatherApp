@@ -1,36 +1,37 @@
 package servlet.authentication;
 
 
+import dto.user.UserLoginDto;
+import exception.user.InvalidCredentialsException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import model.Session;
 import model.User;
-import org.mindrot.jbcrypt.BCrypt;
 import repository.SessionRepository;
 import repository.UserRepository;
 import service.SessionService;
+import service.UserService;
 import servlet.BaseServlet;
 import util.HibernateUtil;
 
 import java.io.IOException;
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-@WebServlet("/login")
+@WebServlet({"/login", "/"})
+
 public class LoginServlet extends BaseServlet {
-    private UserRepository userRepository;
+
     private SessionService sessionService;
+
+    private UserService userService;
 
     @Override
     public void init() throws ServletException {
         super.init();
         try {
-            this.userRepository = new UserRepository(HibernateUtil.getSessionFactory());
             this.sessionService = new SessionService(new SessionRepository(HibernateUtil.getSessionFactory()));
+            this.userService = new UserService(new UserRepository(HibernateUtil.getSessionFactory()));
         } catch (Exception e) {
             throw new ServletException("Failed to initialize LoginServlet", e);
         }
@@ -50,21 +51,22 @@ public class LoginServlet extends BaseServlet {
         String login = req.getParameter("login");
         String password = req.getParameter("password");
 
-        Optional<User> userOpt = userRepository.findByLogin(login);
+        UserLoginDto loginDto = new UserLoginDto();
+        loginDto.setLogin(login);
+        loginDto.setPassword(password);
 
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            if (BCrypt.checkpw(password, user.getPassword())) {
-                Session session = sessionService.createSession(user, 2);
-                setCookie(resp, "JSESSIONID", session.getId().toString(), 3600);
-                resp.sendRedirect(req.getContextPath() + "/profile");
-            } else {
-                context.setVariable("error", "Неправильный логин или пароль");
-                templateEngine.process("login.html", context, resp.getWriter());
-            }
-        } else {
-            context.setVariable("error", "Неправильный логин или пароль");
+        try {
+            User user = userService.authenticateUser(loginDto);
+            Session session = sessionService.createSession(user, 2);
+            setCookie(resp, "JSESSIONID", session.getId().toString(), 3600);
+            resp.sendRedirect(req.getContextPath() + "/locations");
+        } catch (InvalidCredentialsException e) {
+            context.setVariable("error", e.getMessage());
+            templateEngine.process("login.html", context, resp.getWriter());
+        } catch (Exception e) {
+            context.setVariable("error", "An unexpected error occurred. Please try again later.");
             templateEngine.process("login.html", context, resp.getWriter());
         }
     }
+
 }

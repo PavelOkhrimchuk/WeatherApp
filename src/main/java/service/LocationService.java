@@ -1,15 +1,15 @@
 package service;
 
-import dto.WeatherForecastResponseDto;
-import dto.WeatherResponseDto;
+import dto.main.forecast.WeatherForecastResponseDto;
+import dto.main.weather.WeatherResponseDto;
+import exception.location.CityNotFoundException;
+import exception.location.InvalidCityNameException;
 import model.Location;
 import model.User;
 import repository.LocationRepository;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class LocationService {
@@ -29,32 +29,26 @@ public class LocationService {
         return locationRepository.findByUser(user);
     }
 
-    public Map<Location, WeatherResponseDto> getLocationWeatherMap(List<Location> locations) throws IOException {
-        Map<Location, WeatherResponseDto> locationWeatherMap = new HashMap<>();
+    public Optional<Location> addLocationByCityName(String cityName, User user) {
+        try {
+            Optional<WeatherResponseDto> weatherOpt = weatherService.getWeatherByCity(cityName);
 
-        for (Location location : locations) {
-            Optional<WeatherResponseDto> weatherOpt = weatherService.getWeatherByCoordinates(location.getLatitude(), location.getLongitude());
-            weatherOpt.ifPresent(weather -> locationWeatherMap.put(location, weather));
-        }
+            if (weatherOpt.isPresent()) {
+                WeatherResponseDto weather = weatherOpt.get();
+                Location location = new Location();
+                location.setName(cityName);
+                location.setLatitude(weather.getCoord().getLat());
+                location.setLongitude(weather.getCoord().getLon());
+                location.setUser(user);
 
-        return locationWeatherMap;
-    }
-
-    public Optional<Location> addLocationByCityName(String cityName, User user) throws IOException {
-        Optional<WeatherResponseDto> weatherOpt = weatherService.getWeatherByCity(cityName);
-
-        if (weatherOpt.isPresent()) {
-            WeatherResponseDto weather = weatherOpt.get();
-            Location location = new Location();
-            location.setName(cityName);
-            location.setLatitude(weather.getCoord().getLat());
-            location.setLongitude(weather.getCoord().getLon());
-            location.setUser(user);
-
-            locationRepository.save(location);
-            return Optional.of(location);
-        } else {
-            return Optional.empty();
+                locationRepository.save(location);
+                return Optional.of(location);
+            } else {
+                return Optional.empty();
+            }
+        } catch (InvalidCityNameException | CityNotFoundException e) {
+            System.err.println("Error adding location: " + e.getMessage());
+            throw e;
         }
     }
 
@@ -74,4 +68,6 @@ public class LocationService {
     public Optional<WeatherForecastResponseDto> getForecastForLocation(Location location) throws IOException {
         return weatherService.getForecastByCoordinates(location.getLatitude(), location.getLongitude());
     }
+
+
 }

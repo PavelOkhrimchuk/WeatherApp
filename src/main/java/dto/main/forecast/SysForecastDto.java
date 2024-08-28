@@ -1,4 +1,5 @@
-package dto;
+package dto.main.forecast;
+
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
@@ -8,10 +9,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CloudsDto {
+public class SysForecastDto {
 
-
-    @JsonProperty("all")
-    private int all;
-
+    @JsonProperty("pod")
+    private String pod;
 }

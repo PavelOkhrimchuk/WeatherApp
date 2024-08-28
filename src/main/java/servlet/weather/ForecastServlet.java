@@ -1,7 +1,7 @@
 package servlet.weather;
 
 
-import dto.WeatherForecastResponseDto;
+import dto.main.forecast.WeatherForecastResponseDto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +15,7 @@ import service.WeatherService;
 import servlet.BaseServlet;
 import util.ContextUtil;
 import util.HibernateUtil;
+import util.TimeUtil;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -50,6 +51,14 @@ public class ForecastServlet extends BaseServlet {
 
                 if (forecastOpt.isPresent()) {
                     WeatherForecastResponseDto forecast = forecastOpt.get();
+
+
+                    forecast.getList().forEach(item -> {
+                        String utcDateTime = item.getDtTxt();
+                        String moscowDateTime = TimeUtil.convertUtcStringToTimezone(utcDateTime, "Europe/Moscow", "yyyy-MM-dd HH:mm:ss");
+                        item.setDtTxt(moscowDateTime);
+                    });
+
                     WebContext context = ContextUtil.buildWebContext(req, resp, getServletContext());
                     context.setVariable("forecast", forecast);
                     context.setVariable("location", location);

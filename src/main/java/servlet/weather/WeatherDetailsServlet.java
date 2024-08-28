@@ -1,6 +1,6 @@
 package servlet.weather;
 
-import dto.WeatherResponseDto;
+import dto.main.weather.WeatherResponseDto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,17 +13,16 @@ import service.WeatherService;
 import servlet.BaseServlet;
 import util.ContextUtil;
 import util.HibernateUtil;
+import util.TimeUtil;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @WebServlet("/locations/weather/details")
 public class WeatherDetailsServlet extends BaseServlet {
 
+
+    private static final String TIME_ZONE = "Europe/Moscow";
 
     private LocationService locationService;
 
@@ -38,7 +37,7 @@ public class WeatherDetailsServlet extends BaseServlet {
         String locationIdStr = req.getParameter("id");
 
         if (locationIdStr == null) {
-            resp.sendRedirect(req.getContextPath() + "/locations");
+            resp.sendRedirect(getServletContext().getContextPath() + "/locations");
             return;
         }
 
@@ -53,16 +52,8 @@ public class WeatherDetailsServlet extends BaseServlet {
                 if (weatherOpt.isPresent()) {
                     WeatherResponseDto weather = weatherOpt.get();
 
-
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-
-
-                    ZonedDateTime sunriseUtc = Instant.ofEpochSecond(weather.getSys().getSunrise()).atZone(ZoneId.of("UTC"));
-                    ZonedDateTime sunsetUtc = Instant.ofEpochSecond(weather.getSys().getSunset()).atZone(ZoneId.of("UTC"));
-
-                    String sunriseTime = sunriseUtc.withZoneSameInstant(ZoneId.of("Europe/Moscow")).format(formatter);
-                    String sunsetTime = sunsetUtc.withZoneSameInstant(ZoneId.of("Europe/Moscow")).format(formatter);
-
+                    String sunriseTime = TimeUtil.formatEpochSecondsToTime(weather.getSys().getSunrise(), TIME_ZONE);
+                    String sunsetTime = TimeUtil.formatEpochSecondsToTime(weather.getSys().getSunset(), TIME_ZONE);
 
                     WebContext context = ContextUtil.buildWebContext(req, resp, getServletContext());
                     context.setVariable("weather", weather);
@@ -72,13 +63,16 @@ public class WeatherDetailsServlet extends BaseServlet {
 
                     templateEngine.process("weather_details.html", context, resp.getWriter());
                 } else {
-                    resp.sendRedirect(req.getContextPath() + "/locations");
+                    resp.sendRedirect(getServletContext().getContextPath() + "/locations");
                 }
             } else {
-                resp.sendRedirect(req.getContextPath() + "/locations");
+                resp.sendRedirect(getServletContext().getContextPath() + "/locations");
             }
         } catch (NumberFormatException e) {
-            resp.sendRedirect(req.getContextPath() + "/locations");
+            resp.sendRedirect(getServletContext().getContextPath() + "/locations");
         }
     }
 }
+
+
+

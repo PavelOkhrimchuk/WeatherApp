@@ -1,6 +1,10 @@
-package dto;
+package dto.main.weather;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dto.main.CoordinatesDto;
+import dto.main.MainDto;
+import dto.main.WeatherDto;
+import dto.main.WindDto;
 import lombok.*;
 
 import java.util.List;
