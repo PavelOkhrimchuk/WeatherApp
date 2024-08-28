@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 @WebServlet({"/login", "/"})
 
 public class LoginServlet extends BaseServlet {
-    private UserRepository userRepository;
+
     private SessionService sessionService;
 
     private UserService userService;
@@ -35,7 +35,6 @@ public class LoginServlet extends BaseServlet {
     public void init() throws ServletException {
         super.init();
         try {
-            this.userRepository = new UserRepository(HibernateUtil.getSessionFactory());
             this.sessionService = new SessionService(new SessionRepository(HibernateUtil.getSessionFactory()));
             this.userService = new UserService(new UserRepository(HibernateUtil.getSessionFactory()));
         } catch (Exception e) {
@@ -65,7 +64,7 @@ public class LoginServlet extends BaseServlet {
             User user = userService.authenticateUser(loginDto);
             Session session = sessionService.createSession(user, 2);
             setCookie(resp, "JSESSIONID", session.getId().toString(), 3600);
-            resp.sendRedirect(req.getContextPath() + "/profile");
+            resp.sendRedirect(req.getContextPath() + "/locations");
         } catch (InvalidCredentialsException e) {
             context.setVariable("error", e.getMessage());
             templateEngine.process("login.html", context, resp.getWriter());

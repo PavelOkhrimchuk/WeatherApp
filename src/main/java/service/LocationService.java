@@ -29,17 +29,6 @@ public class LocationService {
         return locationRepository.findByUser(user);
     }
 
-    public Map<Location, WeatherResponseDto> getLocationWeatherMap(List<Location> locations) throws IOException {
-        Map<Location, WeatherResponseDto> locationWeatherMap = new HashMap<>();
-
-        for (Location location : locations) {
-            Optional<WeatherResponseDto> weatherOpt = weatherService.getWeatherByCoordinates(location.getLatitude(), location.getLongitude());
-            weatherOpt.ifPresent(weather -> locationWeatherMap.put(location, weather));
-        }
-
-        return locationWeatherMap;
-    }
-
     public Optional<Location> addLocationByCityName(String cityName, User user) throws IOException {
         Optional<WeatherResponseDto> weatherOpt = weatherService.getWeatherByCity(cityName);
 
