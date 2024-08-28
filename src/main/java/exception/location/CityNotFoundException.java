@@ -1,4 +1,4 @@
-package exception;
+package exception.location;
 
 public class CityNotFoundException extends RuntimeException{
 

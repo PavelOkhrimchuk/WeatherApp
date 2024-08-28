@@ -2,15 +2,13 @@ package servlet.authentication;
 
 
 import dto.user.UserLoginDto;
-import exception.InvalidCredentialsException;
+import exception.user.InvalidCredentialsException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import model.Session;
 import model.User;
-import org.mindrot.jbcrypt.BCrypt;
 import repository.SessionRepository;
 import repository.UserRepository;
 import service.SessionService;
@@ -19,9 +17,6 @@ import servlet.BaseServlet;
 import util.HibernateUtil;
 
 import java.io.IOException;
-import java.util.Optional;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @WebServlet({"/login", "/"})
 

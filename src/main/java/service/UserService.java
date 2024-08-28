@@ -2,10 +2,9 @@ package service;
 
 import dto.user.UserLoginDto;
 import dto.user.UserRegistrationDto;
-import exception.InvalidCredentialsException;
-import exception.UserAlreadyExistsException;
-import exception.WeakLoginException;
-import exception.WeakPasswordException;
+import exception.user.InvalidCredentialsException;
+import exception.user.UserAlreadyExistsException;
+import exception.user.WeakPasswordException;
 import model.User;
 import org.mindrot.jbcrypt.BCrypt;
 import repository.UserRepository;

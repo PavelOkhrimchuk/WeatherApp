@@ -1,6 +1,6 @@
 package repository;
 
-import exception.UserAlreadyExistsException;
+import exception.user.UserAlreadyExistsException;
 import model.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;

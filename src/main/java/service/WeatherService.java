@@ -1,12 +1,10 @@
 package service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dto.CoordinatesDto;
-import dto.WeatherForecastResponseDto;
-import dto.WeatherResponseDto;
-import exception.CityNotFoundException;
-import exception.InvalidCityNameException;
-import model.Location;
+import dto.main.forecast.WeatherForecastResponseDto;
+import dto.main.weather.WeatherResponseDto;
+import exception.location.CityNotFoundException;
+import exception.location.InvalidCityNameException;
 
 import java.io.IOException;
 import java.net.URI;

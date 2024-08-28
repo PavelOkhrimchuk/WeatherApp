@@ -1,6 +1,7 @@
-package dto;
+package dto.main.forecast;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dto.main.CoordinatesDto;
 import lombok.*;
 
 

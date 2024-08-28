@@ -1,14 +1,13 @@
 package service;
 
-import exception.SessionCreationException;
-import exception.SessionInvalidationException;
-import exception.SessionNotFoundException;
+import exception.session.SessionCreationException;
+import exception.session.SessionInvalidationException;
+import exception.session.SessionNotFoundException;
 import model.Session;
 import model.User;
 import repository.SessionRepository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 

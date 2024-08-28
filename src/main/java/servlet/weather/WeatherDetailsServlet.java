@@ -1,6 +1,6 @@
 package servlet.weather;
 
-import dto.WeatherResponseDto;
+import dto.main.weather.WeatherResponseDto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,10 +16,6 @@ import util.HibernateUtil;
 import util.TimeUtil;
 
 import java.io.IOException;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @WebServlet("/locations/weather/details")

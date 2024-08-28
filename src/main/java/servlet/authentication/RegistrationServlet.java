@@ -2,15 +2,12 @@ package servlet.authentication;
 
 
 import dto.user.UserRegistrationDto;
-import exception.UserAlreadyExistsException;
-import exception.WeakPasswordException;
+import exception.user.UserAlreadyExistsException;
+import exception.user.WeakPasswordException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import model.User;
-import org.mindrot.jbcrypt.BCrypt;
 import org.thymeleaf.context.WebContext;
 import repository.UserRepository;
 import service.UserService;

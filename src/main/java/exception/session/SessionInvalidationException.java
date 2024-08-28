@@ -1,4 +1,4 @@
-package exception;
+package exception.session;
 
 public class SessionInvalidationException extends RuntimeException{
 

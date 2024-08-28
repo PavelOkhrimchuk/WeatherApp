@@ -1,5 +1,4 @@
-package dto;
-
+package dto.main.weather;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
@@ -9,8 +8,10 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RainDto {
+public class CloudsDto {
 
-    @JsonProperty("3h")
-    private Double threeHour;
+
+    @JsonProperty("all")
+    private int all;
+
 }

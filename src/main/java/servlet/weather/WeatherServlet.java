@@ -1,6 +1,6 @@
 package servlet.weather;
 
-import dto.WeatherResponseDto;
+import dto.main.weather.WeatherResponseDto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;

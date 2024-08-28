@@ -1,17 +1,15 @@
 package service;
 
-import dto.WeatherForecastResponseDto;
-import dto.WeatherResponseDto;
-import exception.CityNotFoundException;
-import exception.InvalidCityNameException;
+import dto.main.forecast.WeatherForecastResponseDto;
+import dto.main.weather.WeatherResponseDto;
+import exception.location.CityNotFoundException;
+import exception.location.InvalidCityNameException;
 import model.Location;
 import model.User;
 import repository.LocationRepository;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class LocationService {

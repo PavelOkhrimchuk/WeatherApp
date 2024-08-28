@@ -1,8 +1,7 @@
 package servlet;
 
-import dto.WeatherResponseDto;
-import exception.CityNotFoundException;
-import exception.InvalidCityNameException;
+import exception.location.CityNotFoundException;
+import exception.location.InvalidCityNameException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +20,6 @@ import util.HibernateUtil;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
