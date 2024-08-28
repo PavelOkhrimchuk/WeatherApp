@@ -93,7 +93,7 @@
             <div class="card-body">
                 <h5 class="card-title" th:text="${item.dtTxt}">Дата и время</h5>
                 <p class="card-text">
-                    <strong>Температура:</strong> <span th:text="${item.main.temp}">0.0</span>°C<br>
+                    <strong>Температура:</strong> <span th:text="${item.main.TempCelsius}">0.0</span>°C<br>
                     <strong>Погодные условия:</strong> <span th:text="${item.weather[0].description}">Описание</span><br>
                     <strong>Ветер:</strong> <span th:text="${item.wind.speed}">0.0</span> м/с
                 </p>
