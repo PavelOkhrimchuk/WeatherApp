@@ -1,6 +1,7 @@
 package servlet.authentication;
 
 
+import dto.user.UserRegistrationDto;
 import exception.UserAlreadyExistsException;
 import exception.WeakPasswordException;
 import jakarta.servlet.ServletException;
@@ -12,6 +13,7 @@ import model.User;
 import org.mindrot.jbcrypt.BCrypt;
 import org.thymeleaf.context.WebContext;
 import repository.UserRepository;
+import service.UserService;
 import servlet.BaseServlet;
 import util.ContextUtil;
 import util.HibernateUtil;
@@ -20,12 +22,14 @@ import java.io.IOException;
 
 @WebServlet("/register")
 public class RegistrationServlet extends BaseServlet {
-    private UserRepository userRepository;
+
+    private UserService userService;
+
 
     @Override
     public void init() throws ServletException {
         super.init();
-        this.userRepository = new UserRepository(HibernateUtil.getSessionFactory());
+        this.userService = new UserService(new UserRepository(HibernateUtil.getSessionFactory()));
     }
 
     @Override
@@ -43,21 +47,13 @@ public class RegistrationServlet extends BaseServlet {
 
         WebContext context = ContextUtil.buildWebContext(req, resp, getServletContext());
 
+        UserRegistrationDto registrationDto = new UserRegistrationDto();
+        registrationDto.setLogin(login);
+        registrationDto.setPassword(password);
+        registrationDto.setConfirmPassword(confirmPassword);
+
         try {
-            if (!password.equals(confirmPassword)) {
-                throw new WeakPasswordException("Passwords do not match.");
-            }
-
-            if (userRepository.findByLogin(login).isPresent()) {
-                throw new UserAlreadyExistsException("Login is already in use.");
-            }
-
-            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-            User user = new User();
-            user.setLogin(login);
-            user.setPassword(hashedPassword);
-
-            userRepository.save(user);
+            userService.registerUser(registrationDto);
             resp.sendRedirect(req.getContextPath() + "/login");
         } catch (UserAlreadyExistsException | WeakPasswordException e) {
             context.setVariable("error", e.getMessage());
@@ -69,3 +65,4 @@ public class RegistrationServlet extends BaseServlet {
     }
 
 }
+

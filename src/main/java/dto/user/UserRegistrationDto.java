@@ -9,4 +9,8 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class UserRegistrationDto {
+
+    private String login;
+    private String password;
+    private String confirmPassword;
 }
