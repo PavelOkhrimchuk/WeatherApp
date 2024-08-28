@@ -4,6 +4,7 @@ import dto.user.UserLoginDto;
 import dto.user.UserRegistrationDto;
 import exception.InvalidCredentialsException;
 import exception.UserAlreadyExistsException;
+import exception.WeakLoginException;
 import exception.WeakPasswordException;
 import model.User;
 import org.mindrot.jbcrypt.BCrypt;
@@ -46,6 +47,13 @@ public class UserService {
         if (userRepository.findByLogin(userDto.getLogin()).isPresent()) {
             throw new UserAlreadyExistsException("Login is already in use.");
         }
+
+
+        if (!userDto.getLogin().matches("[A-Za-z0-9_]+")) {
+            throw new WeakPasswordException("Login contains invalid characters. Please use only letters (A-Z, a-z), numbers (0-9), and underscores (_).");
+        }
+
+
 
     }
 }
