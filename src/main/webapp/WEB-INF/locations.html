@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Мои Локации</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
             background-color: #f8f9fa;
@@ -27,6 +28,8 @@
 
         .location-details {
             flex-grow: 1;
+            display: flex;
+            align-items: center;
         }
 
         .location-name {
@@ -36,6 +39,11 @@
 
         .location-coords {
             color: #6c757d;
+        }
+
+        .weather-icon {
+            font-size: 24px;
+            margin-right: 10px;
         }
 
         .btn-group {
@@ -112,8 +120,12 @@
     <h3 class="mb-4">Список локаций:</h3>
     <div th:if="${locations}" th:each="location : ${locations}" class="location-item">
         <div class="location-details">
-            <div class="location-name" th:text="${location.name}">Название города</div>
-            <div class="location-coords" th:text="'(' + ${location.latitude} + ', ' + ${location.longitude} + ')'"> (Широта, Долгота)</div>
+            <!-- Иконка погоды, добавить соответствующий класс FontAwesome для иконки -->
+            <i class="weather-icon fas fa-cloud-sun"></i>
+            <div>
+                <div class="location-name" th:text="${location.name}">Название города</div>
+                <div class="location-coords" th:text="'(' + ${location.latitude} + ', ' + ${location.longitude} + ')'"> (Широта, Долгота)</div>
+            </div>
         </div>
         <div class="btn-group">
             <!-- Ссылка для получения погоды -->
@@ -129,7 +141,6 @@
             </form>
         </div>
     </div>
-
 
     <form th:action="@{/logout}" method="post" class="mt-4">
         <button type="submit" class="btn btn-secondary w-100">Выйти</button>
