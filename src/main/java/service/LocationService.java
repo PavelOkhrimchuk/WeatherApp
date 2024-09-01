@@ -69,5 +69,4 @@ public class LocationService {
         return weatherService.getForecastByCoordinates(location.getLatitude(), location.getLongitude());
     }
 
-
 }
