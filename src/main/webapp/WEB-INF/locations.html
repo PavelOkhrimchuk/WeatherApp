@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #f0f0f0;
+            color: #333;
         }
 
         .container {
@@ -16,7 +17,7 @@
         }
 
         .location-item {
-            background-color: #fff;
+            background: linear-gradient(135deg, #83a4d4 0%, #b6fbff 100%);
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             padding: 20px;
@@ -24,6 +25,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: #333;
         }
 
         .location-details {
@@ -100,9 +102,19 @@
             background-color: #E53935;
             color: #fff;
         }
+
+        .logout-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
     </style>
 </head>
 <body>
+<form th:action="@{/logout}" method="post" class="logout-button">
+    <button type="submit" class="btn btn-secondary">Выйти</button>
+</form>
+
 <div class="container">
     <h2 class="mb-4 text-center">Мои Локации</h2>
 
@@ -141,10 +153,6 @@
             </form>
         </div>
     </div>
-
-    <form th:action="@{/logout}" method="post" class="mt-4">
-        <button type="submit" class="btn btn-secondary w-100">Выйти</button>
-    </form>
 </div>
 </body>
 </html>
