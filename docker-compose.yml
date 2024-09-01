@@ -16,7 +16,7 @@ services:
       POSTGRES_USER: ohrim
       POSTGRES_PASSWORD: ohrim
     ports:
-      - "5436:5432"
+      - "5439:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
 
