@@ -1,9 +1,8 @@
 package service;
 
+import dto.main.CitySearchResponseDto;
 import dto.main.forecast.WeatherForecastResponseDto;
 import dto.main.weather.WeatherResponseDto;
-import exception.location.CityNotFoundException;
-import exception.location.InvalidCityNameException;
 import model.Location;
 import model.User;
 import repository.LocationRepository;
@@ -29,29 +28,6 @@ public class LocationService {
         return locationRepository.findByUser(user);
     }
 
-    public Optional<Location> addLocationByCityName(String cityName, User user) {
-        try {
-            Optional<WeatherResponseDto> weatherOpt = weatherService.getWeatherByCity(cityName);
-
-            if (weatherOpt.isPresent()) {
-                WeatherResponseDto weather = weatherOpt.get();
-                Location location = new Location();
-                location.setName(cityName);
-                location.setLatitude(weather.getCoord().getLat());
-                location.setLongitude(weather.getCoord().getLon());
-                location.setUser(user);
-
-                locationRepository.save(location);
-                return Optional.of(location);
-            } else {
-                return Optional.empty();
-            }
-        } catch (InvalidCityNameException | CityNotFoundException e) {
-            System.err.println("Error adding location: " + e.getMessage());
-            throw e;
-        }
-    }
-
     public void deleteLocationFromUser(Location location) {
         locationRepository.deleteById(location.getId());
     }
@@ -67,6 +43,19 @@ public class LocationService {
 
     public Optional<WeatherForecastResponseDto> getForecastForLocation(Location location) throws IOException {
         return weatherService.getForecastByCoordinates(location.getLatitude(), location.getLongitude());
+    }
+
+
+    public List<CitySearchResponseDto> searchCities(String cityName) {
+        return weatherService.searchCitiesByName(cityName);
+    }
+
+    public void saveLocation(Location location) {
+        try {
+            locationRepository.save(location);
+        } catch (Exception e) {
+            throw new RuntimeException("Не удалось сохранить местоположение. Попробуйте снова.");
+        }
     }
 
 }

@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 
-@WebServlet(urlPatterns = {"/locations", "/locations/delete"})
+@WebServlet(urlPatterns = {"/locations", "/locations/delete", "/locations/add"})
 public class LocationServlet extends BaseServlet {
 
 
@@ -74,9 +74,11 @@ public class LocationServlet extends BaseServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String cityName = req.getParameter("cityName");
-        String locationIdStr = req.getParameter("locationId");
         String sessionIdStr = getCookieValue(req, "JSESSIONID");
+        String cityName = req.getParameter("cityName");
+        String latitudeStr = req.getParameter("latitude");
+        String longitudeStr = req.getParameter("longitude");
+        String locationIdStr = req.getParameter("locationId");
 
         if (sessionIdStr == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
@@ -91,23 +93,38 @@ public class LocationServlet extends BaseServlet {
 
             if (sessionOpt.isPresent()) {
                 User user = sessionOpt.get().getUser();
-                List<Location> locations = locationService.getLocationsByUser(user);
-                context.setVariable("locations", locations);
-
                 if (locationIdStr != null) {
                     handleLocationDeletion(req, resp, user, locationIdStr);
-                } else if (cityName != null) {
-                    handleCityAddition(req, resp, user, cityName);
+                } else if (cityName != null && latitudeStr != null && longitudeStr != null) {
+                    handleCityAddition(req, resp, user, cityName, latitudeStr, longitudeStr);
+                } else {
+
+                    renderErrorPage(req, resp, "Invalid data. Please try again.", sessionIdStr);
                 }
             } else {
                 resp.sendRedirect(req.getContextPath() + "/login");
             }
-        } catch (InvalidCityNameException | CityNotFoundException e) {
-            renderErrorPage(req, resp, "Failed to add the location. Please check the city name.", sessionIdStr);
-        } catch (IllegalArgumentException e) {
-            renderErrorPage(req, resp, "Invalid data format.", sessionIdStr);
         } catch (Exception e) {
             renderErrorPage(req, resp, "An unexpected error occurred. Please try again later.", sessionIdStr);
+        }
+    }
+
+    private void handleCityAddition(HttpServletRequest req, HttpServletResponse resp, User user, String cityName, String latitudeStr, String longitudeStr) throws IOException, ServletException {
+        try {
+            double latitude = Double.parseDouble(latitudeStr);
+            double longitude = Double.parseDouble(longitudeStr);
+
+            Location location = new Location();
+            location.setName(cityName);
+            location.setLatitude(latitude);
+            location.setLongitude(longitude);
+            location.setUser(user);
+
+            locationService.saveLocation(location);
+
+            resp.sendRedirect(req.getContextPath() + "/locations");
+        } catch (NumberFormatException e) {
+            renderErrorPage(req, resp, "Failed to add the location. Please check the coordinates.", getCookieValue(req, "JSESSIONID"));
         }
     }
 
@@ -125,19 +142,6 @@ public class LocationServlet extends BaseServlet {
         }
     }
 
-    private void handleCityAddition(HttpServletRequest req, HttpServletResponse resp, User user, String cityName) throws IOException, ServletException {
-        try {
-            Optional<Location> locationOpt = locationService.addLocationByCityName(cityName, user);
-            if (locationOpt.isPresent()) {
-                resp.sendRedirect(req.getContextPath() + "/locations");
-            } else {
-                renderErrorPage(req, resp, "Failed to find a city or add a location. Please check the city name.", getCookieValue(req, "JSESSIONID"));
-            }
-        } catch (InvalidCityNameException | CityNotFoundException e) {
-            renderErrorPage(req, resp, "Failed to add the location. Please check the city name.", getCookieValue(req, "JSESSIONID"));
-        }
-    }
-
     private void renderErrorPage(HttpServletRequest req, HttpServletResponse resp, String errorMessage, String sessionIdStr) throws IOException, ServletException {
         WebContext context = ContextUtil.buildWebContext(req, resp, getServletContext());
         UUID sessionId = UUID.fromString(sessionIdStr);
@@ -148,8 +152,6 @@ public class LocationServlet extends BaseServlet {
         context.setVariable("error", errorMessage);
         templateEngine.process("locations.html", context, resp.getWriter());
     }
-
-
 
 
 
