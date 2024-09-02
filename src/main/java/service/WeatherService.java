@@ -2,7 +2,7 @@ package service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dto.CitySearchResponseDto;
+import dto.main.CitySearchResponseDto;
 import dto.main.forecast.WeatherForecastResponseDto;
 import dto.main.weather.WeatherResponseDto;
 import exception.location.CityNotFoundException;
@@ -122,10 +122,4 @@ public class WeatherService {
     }
 
 
-
-
-
-
-
-
-        }
+}

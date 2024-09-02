@@ -1,10 +1,8 @@
 package service;
 
-import dto.CitySearchResponseDto;
+import dto.main.CitySearchResponseDto;
 import dto.main.forecast.WeatherForecastResponseDto;
 import dto.main.weather.WeatherResponseDto;
-import exception.location.CityNotFoundException;
-import exception.location.InvalidCityNameException;
 import model.Location;
 import model.User;
 import repository.LocationRepository;
@@ -28,29 +26,6 @@ public class LocationService {
 
     public List<Location> getLocationsByUser(User user) {
         return locationRepository.findByUser(user);
-    }
-
-    public Optional<Location> addLocationByCityName(String cityName, User user) {
-        try {
-            Optional<WeatherResponseDto> weatherOpt = weatherService.getWeatherByCity(cityName);
-
-            if (weatherOpt.isPresent()) {
-                WeatherResponseDto weather = weatherOpt.get();
-                Location location = new Location();
-                location.setName(cityName);
-                location.setLatitude(weather.getCoord().getLat());
-                location.setLongitude(weather.getCoord().getLon());
-                location.setUser(user);
-
-                locationRepository.save(location);
-                return Optional.of(location);
-            } else {
-                return Optional.empty();
-            }
-        } catch (InvalidCityNameException | CityNotFoundException e) {
-            System.err.println("Error adding location: " + e.getMessage());
-            throw e;
-        }
     }
 
     public void deleteLocationFromUser(Location location) {
@@ -79,7 +54,6 @@ public class LocationService {
         try {
             locationRepository.save(location);
         } catch (Exception e) {
-            System.err.println("Ошибка при сохранении местоположения: " + e.getMessage());
             throw new RuntimeException("Не удалось сохранить местоположение. Попробуйте снова.");
         }
     }

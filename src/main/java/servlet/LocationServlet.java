@@ -98,7 +98,7 @@ public class LocationServlet extends BaseServlet {
                 } else if (cityName != null && latitudeStr != null && longitudeStr != null) {
                     handleCityAddition(req, resp, user, cityName, latitudeStr, longitudeStr);
                 } else {
-                    // Обработка ошибки, если данные не были корректно переданы
+
                     renderErrorPage(req, resp, "Invalid data. Please try again.", sessionIdStr);
                 }
             } else {

@@ -1,7 +1,7 @@
 package servlet;
 
 
-import dto.CitySearchResponseDto;
+import dto.main.CitySearchResponseDto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
