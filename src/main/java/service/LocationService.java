@@ -1,5 +1,6 @@
 package service;
 
+import dto.CitySearchResponseDto;
 import dto.main.forecast.WeatherForecastResponseDto;
 import dto.main.weather.WeatherResponseDto;
 import exception.location.CityNotFoundException;
@@ -67,6 +68,20 @@ public class LocationService {
 
     public Optional<WeatherForecastResponseDto> getForecastForLocation(Location location) throws IOException {
         return weatherService.getForecastByCoordinates(location.getLatitude(), location.getLongitude());
+    }
+
+
+    public List<CitySearchResponseDto> searchCities(String cityName) {
+        return weatherService.searchCitiesByName(cityName);
+    }
+
+    public void saveLocation(Location location) {
+        try {
+            locationRepository.save(location);
+        } catch (Exception e) {
+            System.err.println("Ошибка при сохранении местоположения: " + e.getMessage());
+            throw new RuntimeException("Не удалось сохранить местоположение. Попробуйте снова.");
+        }
     }
 
 }
