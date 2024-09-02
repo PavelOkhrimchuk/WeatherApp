@@ -59,7 +59,7 @@ public class LoginServlet extends BaseServlet {
             User user = userService.authenticateUser(loginDto);
             Session session = sessionService.createSession(user, 2);
             setCookie(resp, "JSESSIONID", session.getId().toString(), 3600);
-            resp.sendRedirect(req.getContextPath() + "/search");
+            resp.sendRedirect(req.getContextPath() + "/locations");
         } catch (InvalidCredentialsException e) {
             context.setVariable("error", e.getMessage());
             templateEngine.process("login.html", context, resp.getWriter());
