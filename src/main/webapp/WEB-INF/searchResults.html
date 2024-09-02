@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Results</title>
+    <link rel="stylesheet" href="">
+</head>
+<body>
+<div class="container">
+    <h1>Search Results</h1>
+
+    <div th:if="${cities.isEmpty()}">
+        <p>No cities found.</p>
+    </div>
+
+    <div th:if="${!cities.isEmpty()}">
+        <ul>
+            <li th:each="city : ${cities}">
+                <p>
+                    <strong th:text="${city.name}"></strong> - <span th:text="${city.country}"></span><br>
+                    Latitude: <span th:text="${city.lat}"></span>, Longitude: <span th:text="${city.lon}"></span>
+                </p>
+                <!-- Форма для добавления локации -->
+                <form th:action="@{/locations/add}" method="post" class="d-inline">
+                    <input type="hidden" name="cityName" th:value="${city.name}">
+                    <input type="hidden" name="latitude" th:value="${city.lat}">
+                    <input type="hidden" name="longitude" th:value="${city.lon}">
+                    <button type="submit" class="btn btn-primary">Add Location</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+
+    <div th:if="${error}" class="error-message">
+        <p th:text="${error}"></p>
+    </div>
+
+    <a href="/search">Search again</a>
+</div>
+</body>
+</html>

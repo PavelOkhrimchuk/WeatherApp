@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Search City</title>
+    <link rel="stylesheet" href="">
+</head>
+<body>
+<div class="container">
+    <h1>Search for a City</h1>
+
+    <form th:action="@{/search}" method="post">
+        <div class="form-group">
+            <label for="cityName">City Name:</label>
+            <input type="text" id="cityName" name="cityName" placeholder="Enter city name" required>
+        </div>
+        <button type="submit">Search</button>
+    </form>
+
+    <div th:if="${error}" class="error-message">
+        <p th:text="${error}"></p>
+    </div>
+</div>
+</body>
+</html>
