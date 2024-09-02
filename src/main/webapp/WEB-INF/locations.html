@@ -53,10 +53,6 @@
             gap: 15px;
         }
 
-        .form-label {
-            font-weight: bold;
-        }
-
         .btn {
             font-size: 16px;
             padding: 10px 20px;
@@ -118,13 +114,10 @@
 <div class="container">
     <h2 class="mb-4 text-center">Мои Локации</h2>
 
-    <form th:action="@{/locations}" method="post" class="mb-4">
-        <div class="mb-3">
-            <label for="cityName" class="form-label">Название города</label>
-            <input type="text" class="form-control" id="cityName" name="cityName" placeholder="Введите название города" required>
-        </div>
-        <button type="submit" class="btn btn-primary w-100">Добавить локацию</button>
-    </form>
+    <!-- Кнопка для перехода на страницу поиска -->
+    <div class="mb-4 text-center">
+        <a th:href="@{/search}" class="btn btn-primary">Добавить новую локацию</a>
+    </div>
 
     <!-- Вывод ошибки, если она есть -->
     <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
