@@ -31,6 +31,11 @@ public class WeatherService {
         this.objectMapper = new ObjectMapper();
     }
 
+    public WeatherService(HttpClient httpClient, ObjectMapper objectMapper) {
+        this.httpClient = httpClient;
+        this.objectMapper = objectMapper;
+    }
+
     public Optional<WeatherResponseDto> getWeatherByCity(String cityName) {
         validateCityName(cityName);
         String encodedCityName = encodeCityName(cityName);
