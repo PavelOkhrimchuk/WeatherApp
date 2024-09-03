@@ -64,6 +64,13 @@
             top: 10px;
             right: 10px;
         }
+
+        .back-button {
+            margin-top: 20px;
+            width: 100%;
+            font-size: 16px;
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
@@ -86,7 +93,7 @@
         <p th:text="${error}"></p>
     </div>
 
-    <a th:href="@{/locations}" class="btn btn-secondary">Назад к локациям</a>
+    <a th:href="@{/locations}" class="btn btn-secondary back-button">Назад к локациям</a>
 </div>
 </body>
 </html>
